@@ -1,0 +1,25 @@
+# 每天北京时间 18:30 推送明日天气。cron 使用 UTC：18:30 +08:00 = 10:30 UTC。
+# GitHub 定时调度是尽力而为，高峰期可能迟到几分钟到十几分钟。
+# 运行前需在仓库 Settings → Secrets and variables → Actions 配置三个 secret：
+#   WECHAT_WEBHOOK / QWEATHER_API_KEY / QWEATHER_API_HOST
+name: daily-weather-push
+
+on:
+  schedule:
+    - cron: '30 10 * * *'
+  workflow_dispatch:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 推送明日天气
+        run: python weather_push.py
+        env:
+          WECHAT_WEBHOOK: ${{ secrets.WECHAT_WEBHOOK }}
+          QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
+          QWEATHER_API_HOST: ${{ secrets.QWEATHER_API_HOST }}

@@ -1,6 +1,6 @@
 # weather-messages-forcast-webhook-robot
 
-基于**企业微信群机器人 webhook** 的定时天气预报推送脚本：每天固定时间由 Windows 任务计划程序触发，调用[和风天气](https://www.qweather.com/) API，把多个城市的**明日天气 + 生活指数 + 气象预警**拼成一条 markdown 消息推到群里。
+基于**企业微信群机器人 webhook** 的定时天气预报推送脚本：每天固定时间自动触发（Windows 任务计划程序，或 GitHub Actions 云端定时），调用[和风天气](https://www.qweather.com/) API，把多个城市的**明日天气 + 生活指数 + 气象预警**拼成一条 markdown 消息推到群里。
 
 单文件、纯 Python 标准库（3.10+），零第三方依赖，密钥全部走本地配置文件、不入库。
 
@@ -70,6 +70,22 @@ schtasks /Create /TN "WeatherPush" /SC DAILY /ST 18:30 /F ^
 - 修改推送时间：`schtasks /Change /TN "WeatherPush" /ST 19:30`
 - 取消任务：`schtasks /Delete /TN "WeatherPush" /F`
 
+## GitHub Actions 云端定时（可选，不依赖本机开机）
+
+仓库自带 workflow（`.github/workflows/weather.yml`），在仓库 **Settings → Secrets and variables → Actions → New repository secret** 依次添加三个 secret 后即自动生效：
+
+| Secret 名 | 值 |
+|---|---|
+| `WECHAT_WEBHOOK` | 企业微信机器人 webhook 完整地址 |
+| `QWEATHER_API_KEY` | 和风天气 API Key |
+| `QWEATHER_API_HOST` | 和风天气专属 API Host |
+
+- 定时为 `cron '30 10 * * *'`——**cron 用 UTC**，即北京时间每天 18:30
+- GitHub 调度是尽力而为，高峰期可能迟到几分钟到十几分钟；想要准点秒推就用下面的 Windows 任务计划
+- 手动验证：仓库 Actions 页 → daily-weather-push → Run workflow
+- 仓库连续 60 天无提交活动，GitHub 会自动停用定时并邮件提醒，到 Actions 页重新启用即可
+- 与本机任务二选一切换：`schtasks /Change /TN "WeatherPush" /Disable`（停用）/ `/Enable`（恢复）
+
 ## 配置说明
 
 全部密钥在 `config.py`（本地文件，已被 .gitignore 排除）：
@@ -94,11 +110,12 @@ schtasks /Create /TN "WeatherPush" /SC DAILY /ST 18:30 /F ^
 ## 目录结构
 
 ```text
-├── weather_push.py     # 主脚本（明日天气 + 生活指数 + 预警 + 重试日志）
-├── config.example.py   # 配置模板，复制为 config.py 后填写
-├── config.py           # 本地真实凭据（不入库）
+├── .github/workflows/weather.yml  # GitHub Actions 云端定时（可选）
+├── weather_push.py                # 主脚本（明日天气 + 生活指数 + 预警 + 重试日志）
+├── config.example.py              # 配置模板，复制为 config.py 后填写
+├── config.py                      # 本地真实凭据（不入库）
 ├── .gitignore
-├── LICENSE             # Apache-2.0
+├── LICENSE                        # Apache-2.0
 └── README.md
 ```
 

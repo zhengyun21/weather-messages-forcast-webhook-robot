@@ -34,10 +34,14 @@ try:
     from config import WECHAT_WEBHOOK, QWEATHER_API_KEY, QWEATHER_API_HOST
 except ImportError:  # 云端（GitHub Actions）没有 config.py，从环境变量取
     WECHAT_WEBHOOK = QWEATHER_API_KEY = QWEATHER_API_HOST = ''
-# 环境变量优先于 config.py，本地不设环境变量时行为不变
-WECHAT_WEBHOOK = os.environ.get('WECHAT_WEBHOOK', WECHAT_WEBHOOK)
-QWEATHER_API_KEY = os.environ.get('QWEATHER_API_KEY', QWEATHER_API_KEY)
-QWEATHER_API_HOST = os.environ.get('QWEATHER_API_HOST', QWEATHER_API_HOST)
+# 环境变量优先于 config.py；去首尾空白，无协议头时自动补 https://（网页填 secret 常见裸域名/带换行）
+WECHAT_WEBHOOK = os.environ.get('WECHAT_WEBHOOK', WECHAT_WEBHOOK).strip()
+QWEATHER_API_KEY = os.environ.get('QWEATHER_API_KEY', QWEATHER_API_KEY).strip()
+QWEATHER_API_HOST = os.environ.get('QWEATHER_API_HOST', QWEATHER_API_HOST).strip()
+if QWEATHER_API_HOST and not QWEATHER_API_HOST.startswith(('http://', 'https://')):
+    QWEATHER_API_HOST = 'https://' + QWEATHER_API_HOST
+if WECHAT_WEBHOOK and not WECHAT_WEBHOOK.startswith(('http://', 'https://')):
+    WECHAT_WEBHOOK = 'https://' + WECHAT_WEBHOOK
 CITIES = ['广州', '汕头', '深圳']
 RETRIES = 2             # 网络调用失败后的额外重试次数
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weather_push.log')

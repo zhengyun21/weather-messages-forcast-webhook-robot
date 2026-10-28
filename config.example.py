@@ -11,5 +11,5 @@ WECHAT_WEBHOOK = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=替换成
 # 控制台 → 项目管理 → 创建项目 → 项目内创建「API Key」凭据
 QWEATHER_API_KEY = '替换成你的APIKey'
 
-# 控制台 → 设置（或项目页）查看专属 API Host，形如 https://abc123.qweatherapi.com
-QWEATHER_API_HOST = 'https://你的专属Host.qweatherapi.com'
+# 控制台 → 设置（或项目页）查看专属 API Host（形如 abc123.qweatherapi.com，不带 https:// 也可以）
+QWEATHER_API_HOST = 'https://abc123.qweatherapi.com'
